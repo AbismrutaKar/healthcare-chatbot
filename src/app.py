@@ -1,24 +1,19 @@
 import streamlit as st
 import pandas as pd
-import joblib
-import os
+from joblib import load
+from rapidfuzz import process, fuzz
 import folium
 from streamlit_folium import st_folium
 
 # --- Page config ---
 st.set_page_config(page_title="Healthcare Chatbot", layout="wide")
 
-# --- Paths ---
-ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
-DATA_PATH = os.path.join(ROOT_DIR, "../data/symptoms_diseases.csv")
-DISEASE_MODEL_PATH = os.path.join(ROOT_DIR, "../models/disease_model.joblib")
-INTENT_MODEL_PATH = os.path.join(ROOT_DIR, "../models/intent_model.joblib")
-
 # --- Load models and dataset ---
-disease_model = joblib.load(DISEASE_MODEL_PATH)
-intent_model = joblib.load(INTENT_MODEL_PATH)
-df = pd.read_csv(DATA_PATH)
+disease_model = load('models/disease_model.joblib')
+intent_model = load('models/intent_model.joblib')
+df = pd.read_csv("data/symptoms_diseases.csv")
 df['symptoms_text'] = df['symptoms'].astype(str)
+symptom_texts = df['symptoms_text'].tolist()
 
 # --- Doctors and Hospitals ---
 doctor_dict = {
@@ -26,24 +21,26 @@ doctor_dict = {
     'flu': ['General Physician', 'Infectious Disease Specialist'],
     'migraine': ['Neurologist']
 }
+
 hospitals = {
     'General Hospital': (28.6139, 77.2090),
     'City Clinic': (28.6200, 77.2100),
     'Sunrise Hospital': (28.6150, 77.2150)
 }
+
 health_tips = {
     "flu": ["Drink plenty of fluids", "Rest well", "Take paracetamol if fever persists"],
     "cold": ["Warm water gargle", "Stay hydrated", "Avoid cold drinks"],
     "migraine": ["Reduce screen time", "Avoid triggers like strong light or smell", "Rest in a dark room"]
 }
 
-# --- Session state for chat ---
+# --- Session state ---
 if 'chat_history' not in st.session_state:
     st.session_state['chat_history'] = []
 if 'predicted_disease' not in st.session_state:
     st.session_state['predicted_disease'] = None
 
-# --- App Header ---
+# --- Header ---
 st.markdown("""
 <div style='background-color:#4CAF50;padding:10px;border-radius:10px;text-align:center'>
 <h1 style='color:white;'>🩺 Healthcare Chatbot</h1>
@@ -57,11 +54,15 @@ st.markdown("---")
 user_input = st.text_input("Describe your symptoms:")
 
 if st.button("Submit") and user_input:
-    # Predict disease using joblib model
-    predicted_disease = disease_model.predict([user_input])[0]
-    st.session_state['predicted_disease'] = predicted_disease
-    st.session_state['chat_history'].append(("You", user_input))
-    st.session_state['chat_history'].append(("Bot", f"Predicted Disease: **{predicted_disease}** ✅"))
+    match, score, idx = process.extractOne(user_input, symptom_texts, scorer=fuzz.WRatio, score_cutoff=60)
+    if match:
+        predicted_disease = df.iloc[idx]['disease']
+        st.session_state['predicted_disease'] = predicted_disease
+        st.session_state['chat_history'].append(("You", user_input))
+        st.session_state['chat_history'].append(("Bot", f"Predicted Disease: **{predicted_disease}** ✅"))
+    else:
+        st.session_state['chat_history'].append(("You", user_input))
+        st.session_state['chat_history'].append(("Bot", "No matching disease found. Please describe your symptoms more clearly."))
 
 # --- Display Chat History ---
 for speaker, message in st.session_state['chat_history']:
