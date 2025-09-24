@@ -1,18 +1,24 @@
 import streamlit as st
 import pandas as pd
-from sentence_transformers import SentenceTransformer
-from rapidfuzz import process, fuzz
+import joblib
+import os
 import folium
 from streamlit_folium import st_folium
 
 # --- Page config ---
 st.set_page_config(page_title="Healthcare Chatbot", layout="wide")
 
-# --- Load model and dataset ---
-model = SentenceTransformer('models/all-MiniLM-L6-v2')  # model folder in repo
-df = pd.read_csv("data/symptoms_diseases.csv")          # CSV in repo
+# --- Paths ---
+ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_PATH = os.path.join(ROOT_DIR, "../data/symptoms_diseases.csv")
+DISEASE_MODEL_PATH = os.path.join(ROOT_DIR, "../models/disease_model.joblib")
+INTENT_MODEL_PATH = os.path.join(ROOT_DIR, "../models/intent_model.joblib")
+
+# --- Load models and dataset ---
+disease_model = joblib.load(DISEASE_MODEL_PATH)
+intent_model = joblib.load(INTENT_MODEL_PATH)
+df = pd.read_csv(DATA_PATH)
 df['symptoms_text'] = df['symptoms'].astype(str)
-symptom_texts = df['symptoms_text'].tolist()
 
 # --- Doctors and Hospitals ---
 doctor_dict = {
@@ -51,16 +57,11 @@ st.markdown("---")
 user_input = st.text_input("Describe your symptoms:")
 
 if st.button("Submit") and user_input:
-    match_data = process.extractOne(user_input, symptom_texts, scorer=fuzz.WRatio, score_cutoff=60)
-    if match_data:
-        match, score, idx = match_data
-        predicted_disease = df.iloc[idx]['disease']
-        st.session_state['predicted_disease'] = predicted_disease
-        st.session_state['chat_history'].append(("You", user_input))
-        st.session_state['chat_history'].append(("Bot", f"Predicted Disease: **{predicted_disease}** ✅"))
-    else:
-        st.session_state['chat_history'].append(("You", user_input))
-        st.session_state['chat_history'].append(("Bot", "No matching disease found. Please describe your symptoms more clearly."))
+    # Predict disease using joblib model
+    predicted_disease = disease_model.predict([user_input])[0]
+    st.session_state['predicted_disease'] = predicted_disease
+    st.session_state['chat_history'].append(("You", user_input))
+    st.session_state['chat_history'].append(("Bot", f"Predicted Disease: **{predicted_disease}** ✅"))
 
 # --- Display Chat History ---
 for speaker, message in st.session_state['chat_history']:
