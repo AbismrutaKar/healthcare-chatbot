@@ -118,4 +118,4 @@ This project is open source and available under the MIT License.
 ## Contact
 
 - GitHub: [https://github.com/<your-username>](https://github.com/<your-username>)
-- Email: <your-email@example.com>
+- Email: <karabismruta@gmail.com
