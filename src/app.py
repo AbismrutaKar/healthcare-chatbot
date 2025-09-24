@@ -9,7 +9,7 @@ from streamlit_folium import st_folium
 st.set_page_config(page_title="Healthcare Chatbot", layout="wide")
 
 # --- Load model and dataset ---
-model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
+model = SentenceTransformer('models/all-MiniLM-L6-v2')
 df = pd.read_csv("../data/symptoms_diseases.csv")
 df['symptoms_text'] = df['symptoms'].astype(str)
 symptom_texts = df['symptoms_text'].tolist()
