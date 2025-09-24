@@ -107,16 +107,7 @@ healthcare-chatbot/
 - Add voice input for symptoms
 - Add symptom severity scoring for more precise predictions
 
----
-
-## License
-
-This project is open source and available under the MIT License.
-
----
 
 ## Contact
-
-- GitHub: [https://github.com/<your-username>](https://github.com/<your-username>)
 - Email: karabismruta@gmail.com
-- 
+  
