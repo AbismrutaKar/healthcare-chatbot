@@ -1,0 +1,28 @@
+symptoms,disease
+"fever and cough",cold
+"sore throat and sneezing",cold
+"runny nose and mild fever",cold
+"stuffy nose and fatigue",cold
+"mild headache and congestion",cold
+"chills and high fever",flu
+"body ache and cough",flu
+"high fever and fatigue",flu
+"cough and sore throat",flu
+"chills, fever, and muscle pain",flu
+"headache and nausea",migraine
+"severe headache and blurred vision",migraine
+"nausea and dizziness",migraine
+"sensitivity to light and sound",migraine
+"throbbing headache with vomiting",migraine
+"fever, cough, and sore throat",cold
+"runny nose and sneezing fits",cold
+"fatigue and mild fever",cold
+"muscle ache and high fever",flu
+"chills and headache",flu
+"severe migraine with nausea",migraine
+"head pain and dizziness",migraine
+"nausea and visual disturbances",migraine
+"runny nose, cough, and mild fever",cold
+"sore throat and congestion",cold
+"body aches, fatigue, and fever",flu
+"headache, nausea, and sensitivity to light",migraine
