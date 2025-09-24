@@ -9,8 +9,8 @@ from streamlit_folium import st_folium
 st.set_page_config(page_title="Healthcare Chatbot", layout="wide")
 
 # --- Load model and dataset ---
-model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
-df = pd.read_csv("data/symptoms_diseases.csv")
+model = SentenceTransformer('models/all-MiniLM-L6-v2')  # model folder in repo
+df = pd.read_csv("data/symptoms_diseases.csv")          # CSV in repo
 df['symptoms_text'] = df['symptoms'].astype(str)
 symptom_texts = df['symptoms_text'].tolist()
 
@@ -51,8 +51,9 @@ st.markdown("---")
 user_input = st.text_input("Describe your symptoms:")
 
 if st.button("Submit") and user_input:
-    match, score, idx = process.extractOne(user_input, symptom_texts, scorer=fuzz.WRatio, score_cutoff=60)
-    if match:
+    match_data = process.extractOne(user_input, symptom_texts, scorer=fuzz.WRatio, score_cutoff=60)
+    if match_data:
+        match, score, idx = match_data
         predicted_disease = df.iloc[idx]['disease']
         st.session_state['predicted_disease'] = predicted_disease
         st.session_state['chat_history'].append(("You", user_input))
